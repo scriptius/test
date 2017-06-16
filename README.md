@@ -19,7 +19,14 @@ CREATE TABLE `phone_numbers` (
 
 ***********************************РЕШЕНИЕ:**********************************
 ```php
-<?php here_pagecontent(); ?>
+SELECT `u`.`name`, COUNT(`p`.`phone`) as `count_phone`
+FROM `users` as `u`
+LEFT JOIN `phone_numbers` as `p`
+ON `u`.`id` = `p`.`user_id`
+WHERE 
+	(`gender` = 2) 
+  AND (TIMESTAMPDIFF(YEAR, DATE_FORMAT(FROM_UNIXTIME(`birth_date`),'%Y-%m-%d %H:%i:%s'),NOW()) BETWEEN 18 AND 22)
+GROUP BY `u`.`name`
 ```
 SELECT `u`.`name`, COUNT(`p`.`phone`) as `count_phone`
 FROM `users` as `u`
