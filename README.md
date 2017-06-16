@@ -18,6 +18,9 @@ CREATE TABLE `phone_numbers` (
 Оптимизируйте таблицы и запрос при необходимости.
 
 ***********************************РЕШЕНИЕ:**********************************
+```php
+<?php here_pagecontent(); ?>
+```
 SELECT `u`.`name`, COUNT(`p`.`phone`) as `count_phone`
 FROM `users` as `u`
 LEFT JOIN `phone_numbers` as `p`
