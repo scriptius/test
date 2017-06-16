@@ -1,4 +1,4 @@
-#Задача №1
+# Задача №1
 Имеется база со следующими таблицами:
 ```php
 CREATE TABLE `users` (
@@ -36,7 +36,7 @@ GROUP BY `u`.`name`
 birth_date — заменить на date. С точки зрения производительности не знаю как это отразится, но визуально с базы читается легче чем набор цифр timestamp.
 Phone  - заменить на char — экономим память
 Добавить внешние ключи по полю user_id, а также можно добавить индекс по полям gender,  birth_date
-
+```php
 CREATE TABLE `user` (
   `id` serial,
   `name` varchar(255) DEFAULT NULL,
@@ -56,10 +56,10 @@ ALTER TABLE `phone_numbers`
   ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) 
   ON UPDATE CASCADE 
   ON DELETE NO ACTION;
+```
   
   
-  
-  Задача №2
+ # Задача №2
 Имеется строка:
 https://www.somehost.com/test/index.html?param1=4&param2=3&param3=2&param4=1&param5=3
 Напишите функцию, которая:
