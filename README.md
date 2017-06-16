@@ -239,9 +239,10 @@ class Article extends Model
 ```
 
 
-Задача №4
+# Задача №4
 Проведите рефакторинг, исправьте баги и продокументируйте в стиле PHPDoc код, приведённый ниже (таблица users здесь аналогична таблице users из задачи №1).
 Примечание: код написан исключительно в тестовых целях, это не "жизненный пример" :)
+```php
 function load_users_data($user_ids) {
     $user_ids = explode(',', $user_ids);
     foreach ($user_ids as $user_id) {
@@ -260,10 +261,93 @@ $data = load_users_data($_GET['user_ids']);
 foreach ($data as $user_id=>$name) {
     echo "<a href=\"/show_user.php?id=$user_id\">$name</a>";
 }
+```
 Плюсом будет, если укажете, какие именно уязвимости присутствуют в исходном варианте (если таковые, на ваш взгляд, имеются), и приведёте примеры их проявления.
+#### Решение
+1. Данные $user_ids перед вставкой не проверены, одно из первых правил безопасности
+2. Я бы переписал данный код с процедурного подхода на объектный
+3. Объект класса DB необходимо вынести в отдельный класс и сделать его singleton
+4. Нет подготовленных запросов, что может приветсти к SQL-инъекциям
+5. Рекомендуется инициализировать первоначальные значения переменных, например $data в load_users_data()
+6. Пароль к БД хранится не в конфиге, причем в открытом виде. Я бы сделал конфиг, в котором сделал бы секцию db и при деплое при помощи phing подменял {{USERNAME}} и {{PASSWORD}} на конкретные значения
+```php
+ 'db' => [
+    'host'     => 'localhost',
+    'dbName'   => 'test',
+    'userName' => '{{USERNAME}}',
+    'password' => '{{PASSWORD}}',
+],
+```
+Листинг
+```php
+/**
+ * Получение массива UsersIDS
+ * @param string $listUsersIDS
+ * @return array
+ */
+function getListUsersIDS (string $listUsersIDS) {
+    $userIds = explode(',', $listUsersIDS);
+    return checkID($userIds);
+}
 
-Вопрос №1
+/**
+ * Проверка id на корректность
+ * @param array $ids
+ * @return array
+ */
+function checkID (array $ids) {
+    $cleanIDS = [];
+    foreach ($ids as $itemID) {
+        if (is_numeric((int)$itemID)) {
+            $cleanIDS[] = $itemID;
+        } else {
+            continue;
+        }
+    }
+    return $cleanIDS;
+}
+
+/**
+ * Загрузка пользовательских данных
+ * @param $userIds
+ * @return array
+ */
+function load_users_data($userIds) {
+    $data = [];
+    $config = Config::getInstance();
+    // Условно в $dbh хранится объект PDO, в который мы передаем условный конфиг
+    $dbh = Db::getInstance($config);
+    $sth = $dbh->prepare('SELECT * FROM users WHERE id=:userID');
+    foreach (getListUsersIDS($userIds) as $userId) {
+        $sth->bindParam(':userID', $userId, PDO::PARAM_INT);
+        $sth->execute();
+        while($obj = $sth->fetch(PDO::FETCH_OBJ)) {
+            $data[$userId] = $obj->name;
+        }
+
+        $dbh = null;
+    }
+    return $data;
+}
+// Как правило, в $_GET['user_ids'] должна приходить строка
+// с номерами пользователей через запятую, например: 1,2,17,48
+$data = load_users_data($_GET['user_ids']);
+foreach ($data as $user_id => $name) {
+    echo "<a href=\"/show_user.php?id=$user_id\">$name</a>";
+}
+```
+
+# Вопрос №1
 Занимались ли вы разработкой автоматизированных функциональных тестов, нагрузочных тестов, либо unit-тестов? Если да – сообщите, что доводилось использовать, какие решали задачи и с каким результатом. Если нет – не страшно, поможем освоить :)
 
-Вопрос №2
+В учебных целях писал тесты на php unit
+
+# Вопрос №2
 Перечислите книги (либо веб-ресурсы), которые Вы прочитали и усвоили (либо регулярно читаете), и какие можете рекомендовать своим коллегам для использования в работе, повышения профессионализма, расширения кругозора.
+Habrahabr
+Стив Макконел "Совершенный код" - прочитано 75%
+Мэт Зандстра "PHP объекты, шаблоны и методики программирования"  - прочитано 50%
+Рекомендую также Эрик Фримен Элизабет Фримен - Паттерны проектирования.
+
+Хочу прочитать Мартин фаулер "Рефакторинг"
+
