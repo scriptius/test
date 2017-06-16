@@ -1,5 +1,6 @@
-Задача №1
+#Задача №1
 Имеется база со следующими таблицами:
+```php
 CREATE TABLE `users` (
     `id`         INT(11) NOT NULL AUTO_INCREMENT,
     `name`       VARCHAR(255) DEFAULT NULL,
@@ -13,11 +14,11 @@ CREATE TABLE `phone_numbers` (
     `phone`   VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
-
+```
 Напишите запрос, возвращающий имя и число указанных телефонных номеров девушек в возрасте от 18 до 22 лет.
 Оптимизируйте таблицы и запрос при необходимости.
 
-***********************************РЕШЕНИЕ:**********************************
+***РЕШЕНИЕ:
 ```php
 SELECT `u`.`name`, COUNT(`p`.`phone`) as `count_phone`
 FROM `users` as `u`
